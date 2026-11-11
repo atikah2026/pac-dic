@@ -61,32 +61,32 @@
     <script>
         // Exact 26 PAC entities matching your updated QuickSight setup
         const PAC_LIST = [
-            { name: "BRIDGE", defaultVal: 0, color: "#20419A" },
-            { name: "CHEVRON", defaultVal: 0, color: "#00B1A9" },
-            { name: "COP", defaultVal: 0, color: "#763F98" },
-            { name: "DIALOG", defaultVal: 0, color: "#BFD730" },
-            { name: "ENQUEST", defaultVal: 0, color: "#1BBCF5" },
-            { name: "EPOMS", defaultVal: 0, color: "#7D86D9" },
-            { name: "HIBISCUS", defaultVal: 0, color: "#999999" },
-            { name: "INPEX", defaultVal: 0, color: "#BA9FCB" },
-            { name: "IPC", defaultVal: 0, color: "#AEE2E0" },
-            { name: "JSE", defaultVal: 0, color: "#AB1C1F" },
-            { name: "ME", defaultVal: 0, color: "#03B050" },
-            { name: "MEDCO", defaultVal: 0, color: "#C48700" },
-            { name: "PCSB", defaultVal: 0, color: "#BBC9DD" },
-            { name: "PETRA", defaultVal: 0, color: "#9784DA" },
-            { name: "PETROFAC", defaultVal: 0, color: "#FCDBE6" },
-            { name: "PING", defaultVal: 0, color: "#FFE3A7" },
+            { name: "BRIDGE", defaultVal: 0, color: "#00B1A9" },
+            { name: "CHEVRON", defaultVal: 0, color: "#20419A" },
+            { name: "COP", defaultVal: 0, color: "#BA9FCB" },
+            { name: "DIALOG", defaultVal: 0, color: "#1BBCF5" },
+            { name: "ENQUEST", defaultVal: 0, color: "#FDB924" },
+            { name: "EPOMS", defaultVal: 0, color: "#AEE2E0" },
+            { name: "HIBISCUS", defaultVal: 0, color: "#7D86D9" },
+            { name: "INPEX", defaultVal: 0, color: "#BFD730" },
+            { name: "IPC", defaultVal: 0, color: "#FCDBE6" },
+            { name: "JSE", defaultVal: 0, color: "#763F98" },
+            { name: "ME", defaultVal: 0, color: "#AB1C1F" },
+            { name: "MEDCO", defaultVal: 0, color: "#999999" },
+            { name: "PCSB", defaultVal: 0, color: "#E0CBE9" },
+            { name: "PETRA", defaultVal: 0, color: "#03B050" },
+            { name: "PETROFAC", defaultVal: 0, color: "#C48700" },
+            { name: "PING", defaultVal: 0, color: "#8C8C8C" },
             { name: "POSCO", defaultVal: 0, color: "#FF0101" },
-            { name: "PTTEP", defaultVal: 0, color: "#4A90E2" },
-            { name: "SEARAH", defaultVal: 0, color: "#50E3C2" },
-            { name: "SEASCAPE", defaultVal: 0, color: "#B8E986" },
-            { name: "SHELL", defaultVal: 0, color: "#F5A623" },
-            { name: "SKEO", defaultVal: 0, color: "#D0021B" },
-            { name: "SUMDP", defaultVal: 0, color: "#9013FE" },
-            { name: "TEPMY", defaultVal: 0, color: "#8B572A" },
-            { name: "VESTIGO", defaultVal: 0, color: "#7ED321" },
-            { name: "XPLORA", defaultVal: 0, color: "#417505" }
+            { name: "PTTEP", defaultVal: 0, color: "#FFBF01" },
+            { name: "SEARAH", defaultVal: 0, color: "#9784DA" },
+            { name: "SEASCAPE", defaultVal: 0, color: "#CCEFEE" },
+            { name: "SHELL", defaultVal: 0, color: "#FFE3A7" },
+            { name: "SKEO", defaultVal: 0, color: "#1BBCF5" },
+            { name: "SUMDP", defaultVal: 0, color: "#00B1A9" },
+            { name: "TEPMY", defaultVal: 0, color: "#BFD730" },
+            { name: "VESTIGO", defaultVal: 0, color: "#AB1C1F" },
+            { name: "XPLORA", defaultVal: 0, color: "#20419A" }
         ];
 
         let pacValues = {};
@@ -197,7 +197,7 @@
                         dataLabels: { enabled: false },
                         linecap: 'square',
                         showInLegend: true,
-                        legendSymbol: 'rectangle'
+                        legendSymbol: 'rectangle' // Forces legend to display colored rectangles
                     }
                 },
                 legend: {
@@ -206,18 +206,25 @@
                     verticalAlign: 'bottom',
                     layout: 'horizontal',
                     maxHeight: 120,
-                    itemDistance: 12,
+                    itemDistance: 14,
                     symbolWidth: 10,
                     symbolHeight: 10,
-                    symbolPadding: 4,
+                    symbolRadius: 2, // Slight rounding for clean visual appearance
+                    symbolPadding: 6,
                     itemStyle: {
                         color: '#334155',
                         fontSize: '10px',
-                        fontWeight: '500'
+                        fontWeight: '600'
                     },
                     itemHoverStyle: {
                         color: '#0284c7'
-                    }
+                    },
+                    // Dynamically color-code legend symbols to match each PAC ring color
+                    labelFormatter: function () {
+                        const pointColor = this.options.color || (this.colorIndex !== undefined ? this.chart.options.colors[this.colorIndex] : '#334155');
+                        return `<span style="color:${pointColor}; font-size:12px; font-weight:bold;">■</span> ${this.name}`;
+                    },
+                    useHTML: true
                 },
                 tooltip: {
                     enabled: true,
