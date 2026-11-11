@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>26 PAC Multi-Ring Gauge Dashboard</title>
-    <!-- Tailwind CSS for UI Layout -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -20,10 +19,8 @@
             }
         }
     </script>
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Robust Multi-CDN script loading with fallback -->
     <script src="https://cdn.jsdelivr.net/npm/highcharts@11.4.0/highcharts.js" onerror="this.src='https://cdnjs.cloudflare.com/ajax/libs/highcharts/11.4.0/highcharts.js'"></script>
     <script src="https://cdn.jsdelivr.net/npm/highcharts@11.4.0/highcharts-more.js" onerror="this.src='https://cdnjs.cloudflare.com/ajax/libs/highcharts/11.4.0/highcharts-more.js'"></script>
     <script src="https://cdn.jsdelivr.net/npm/highcharts@11.4.0/modules/solid-gauge.js" onerror="this.src='https://cdnjs.cloudflare.com/ajax/libs/highcharts/11.4.0/modules/solid-gauge.js'"></script>
@@ -54,7 +51,6 @@
 </head>
 <body class="bg-white text-slate-800 min-h-screen font-sans antialiased flex flex-col items-center justify-center p-0 m-0">
 
-    <!-- Standalone Clean Chart Container -->
     <div id="gaugeContainer" class="w-full h-full flex items-center justify-center p-2 bg-white">
         <div id="loadingState" class="flex flex-col items-center gap-3 text-slate-500">
             <i class="fa-solid fa-circle-notch fa-spin text-3xl text-sky-600"></i>
@@ -63,7 +59,7 @@
     </div>
 
     <script>
-        // List of 26 PAC entities matching your dataset
+        // Exact 26 PAC entities matching your updated QuickSight setup
         const PAC_LIST = [
             { name: "BRIDGE", defaultVal: 0, color: "#20419A" },
             { name: "CHEVRON", defaultVal: 0, color: "#00B1A9" },
@@ -108,21 +104,19 @@
             }
         }
 
-        // Parse Query Parameters passed from QuickSight URL action or parameter mapping
         function loadValuesFromUrlOrDefaults() {
             const urlParams = new URLSearchParams(window.location.search);
             PAC_LIST.forEach(pac => {
                 const exactVal = urlParams.get(pac.name);
                 const lowerVal = urlParams.get(pac.name.toLowerCase());
-                const calcFieldVal = urlParams.get(`${pac.name}value`) || urlParams.get(`${pac.name}_value`);
+                const calcFieldVal = urlParams.get(`${pac.name}value`) || urlParams.get(`${pac.name}VALUE`) || urlParams.get(`${pac.name}_value`);
                 const completionRateVal = urlParams.get(`${pac.name}_Completion_Rate`) || urlParams.get(`${pac.name}_rate`);
                 
                 const rawParamVal = exactVal ?? lowerVal ?? calcFieldVal ?? completionRateVal;
 
-                if (rawParamVal !== null && !isNaN(rawParamVal)) {
+                if (rawParamVal !== null && rawParamVal !== "" && !isNaN(rawParamVal)) {
                     let parsed = parseFloat(rawParamVal);
-                    // Automatically convert calculated field decimal fraction (0.85 -> 85%)
-                    if (parsed <= 1 && parsed >= 0) parsed = parsed * 100;
+                    if (parsed <= 1 && parsed > 0) parsed = parsed * 100;
                     pacValues[pac.name] = Math.min(100, Math.max(0, parsed));
                 } else {
                     pacValues[pac.name] = pac.defaultVal;
@@ -142,7 +136,7 @@
             
             const totalPACs = PAC_LIST.length;
             const outerRadius = 100;
-            const innerMinRadius = 6;
+            const innerMinRadius = 12;
             const step = (outerRadius - innerMinRadius) / totalPACs;
 
             PAC_LIST.forEach((pac, index) => {
@@ -150,10 +144,16 @@
                 const ringInnerRadius = outerRadius - ((index + 1) * step);
                 const val = pacValues[pac.name] ?? pac.defaultVal;
 
+                // Added explicit background tracks so empty/0% rings are fully visible
                 paneList.push({
                     startAngle: 0,
                     endAngle: 360,
-                    background: null,
+                    background: [{
+                        outerRadius: `${ringRadius.toFixed(1)}%`,
+                        innerRadius: `${(ringInnerRadius + 0.3).toFixed(1)}%`,
+                        backgroundColor: 'rgba(241, 245, 249, 0.9)',
+                        borderWidth: 0
+                    }],
                     size: `${ringRadius.toFixed(1)}%`
                 });
 
@@ -171,7 +171,7 @@
                     data: [{
                         color: pac.color,
                         radius: `${ringRadius.toFixed(1)}%`,
-                        innerRadius: `${(ringInnerRadius + 0.4).toFixed(1)}%`,
+                        innerRadius: `${(ringInnerRadius + 0.3).toFixed(1)}%`,
                         y: val
                     }],
                     color: pac.color,
@@ -205,7 +205,7 @@
                     align: 'center',
                     verticalAlign: 'bottom',
                     layout: 'horizontal',
-                    maxHeight: 100,
+                    maxHeight: 120,
                     itemDistance: 12,
                     symbolWidth: 10,
                     symbolHeight: 10,
